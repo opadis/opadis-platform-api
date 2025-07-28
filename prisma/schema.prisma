@@ -5,235 +5,267 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  // previewFeatures = ["multiSchema"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  // schemas  = ["public", "auth"]
+  // schemas  = ["public"]
 }
 
 // Enums
 enum status {
   ACTIVO
   SUSPENDIDO
+
+  
 }
 
 enum validation_status {
   PENDING
   APPROVED
   REJECTED
+
+  
 }
 
 enum application_status {
   PENDING
   ACCEPTED
   REJECTED
+
+  
 }
 
 enum suggestion_status {
   PENDING
   REVIEWED
+
+  
 }
 
 // Tablas
 model role {
-  id    Int    @id @default(autoincrement())
-  name  String @unique
+  id   Int    @id @default(autoincrement())
+  name String @unique
 
   users user[]
 
   @@map("role")
+  
 }
 
 model user {
-  id          Int        @id @default(autoincrement())
-  name        String     @db.VarChar(100)
-  email       String     @unique
-  password    String
-  roleId      Int        @map("role_id")
-  status      status
-  createdAt   DateTime   @default(now()) @map("created_at")
-  updatedAt   DateTime   @updatedAt @map("updated_at")
-  deletedAt   DateTime?  @db.Timestamp(6) @map("deleted_at")
+  id        String   @id @default(dbgenerated()) @db.Uuid
+  name      String    @db.VarChar(100)
+  email     String    @unique
+  password  String
+  roleId    Int       @map("role_id")
+  status    status
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at") @db.Timestamp(6)
 
-  role              role      @relation(fields: [roleId], references: [id])
-  person            person?
-  company           company?
-  branch            branch?
-  suggestions       suggestion[]
-  suggestion_votes  suggestion_vote[]
+  // conexión con Supabase Auth
+  // authUserId String?    @unique @map("auth_user_id") @db.Uuid
+  // auth_user  auth_user? @relation(fields: [authUserId], references: [id])
+
+  // relaciones internas
+  role                   role              @relation(fields: [roleId], references: [id])
+  person                 person?
+  company                company?
+  branch                 branch?
+  suggestions            suggestion[]
+  suggestion_votes       suggestion_vote[]
+  company_branches_owned company_branch[]
 
   @@map("user")
+  
 }
 
 model person {
-  id                Int                @id @default(autoincrement())
-  userId            Int                @unique @map("user_id")
-  curriculum        String?
-  disabilityType    String?            @map("disability_type")
-  location          String?
-  jobProfile        String?            @map("job_profile")
-  createdAt         DateTime           @default(now()) @map("created_at")
-  updatedAt         DateTime           @updatedAt @map("updated_at")
-  deletedAt         DateTime?          @db.Timestamp(6) @map("deleted_at")
+  id             Int       @id @default(autoincrement())
+  userId         String    @unique @map("user_id") @db.Uuid
+  curriculum     String?
+  disabilityType String?   @map("disability_type")
+  location       String?
+  jobProfile     String?   @map("job_profile")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamp(6)
 
-  user              user               @relation(fields: [userId], references: [id])
-  applications      application[]
+  user               user                @relation(fields: [userId], references: [id])
+  applications       application[]
   course_enrollments course_enrollment[]
 
   @@map("person")
+  
 }
 
 model company {
-  id               Int               @id @default(autoincrement())
-  userId           Int               @unique @map("user_id")
-  name             String
-  rfc              String?
-  documents        String?
-  validationState  validation_status @default(PENDING) @map("validation_state")
-  municipalityId   Int               @map("municipality_id")
-  createdAt        DateTime          @default(now()) @map("created_at")
-  updatedAt        DateTime          @updatedAt @map("updated_at")
-  deletedAt        DateTime?         @db.Timestamp(6) @map("deleted_at")
+  id              Int               @id @default(autoincrement())
+  userId          String            @unique @map("user_id") @db.Uuid
+  name            String
+  rfc             String?
+  documents       String?
+  validationState validation_status @default(PENDING) @map("validation_state")
+  municipalityId  Int               @map("municipality_id")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+  deletedAt       DateTime?         @map("deleted_at") @db.Timestamp(6)
 
-  user             user              @relation(fields: [userId], references: [id])
-  municipality     municipality      @relation(fields: [municipalityId], references: [id])
+  user             user             @relation(fields: [userId], references: [id])
+  municipality     municipality     @relation(fields: [municipalityId], references: [id])
   job_offers       job_offer[]
   courses          course[]
   company_branches company_branch[]
 
   @@map("company")
+  
 }
 
 model branch {
-  id               Int         @id @default(autoincrement())
-  userId           Int         @unique @map("user_id")
-  name             String
-  municipalityId   Int         @map("municipality_id")
-  status           status      @default(ACTIVO)
-  createdAt        DateTime    @default(now()) @map("created_at")
-  updatedAt        DateTime    @updatedAt @map("updated_at")
-  deletedAt        DateTime?   @db.Timestamp(6) @map("deleted_at")
+  id             Int       @id @default(autoincrement())
+  userId         String    @unique @map("user_id") @db.Uuid
+  name           String
+  municipalityId Int       @map("municipality_id")
+  status         status    @default(ACTIVO)
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamp(6)
 
-  user             user        @relation(fields: [userId], references: [id])
-  municipality     municipality @relation(fields: [municipalityId], references: [id])
+  user             user             @relation(fields: [userId], references: [id])
+  municipality     municipality     @relation(fields: [municipalityId], references: [id])
   company_branches company_branch[]
 
   @@map("branch")
+  
 }
 
 model municipality {
-  id            Int        @id @default(autoincrement())
-  name          String
-  state         String
-  createdAt     DateTime   @default(now()) @map("created_at")
-  updatedAt     DateTime   @updatedAt @map("updated_at")
-  deletedAt     DateTime?  @db.Timestamp(6) @map("deleted_at")
+  id        Int       @id @default(autoincrement())
+  name      String
+  state     String
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at") @db.Timestamp(6)
 
-  branches      branch[]
-  companies     company[]
+  branches  branch[]
+  companies company[]
 
   @@map("municipality")
+  
 }
 
 model job_offer {
-  id           Int        @id @default(autoincrement())
-  companyId    Int        @map("company_id")
-  title        String
-  description  String
-  location     String
-  startDate    DateTime   @map("start_date")
-  endDate      DateTime   @map("end_date")
-  available    Boolean    @default(true)
-  createdAt    DateTime   @default(now()) @map("created_at")
-  updatedAt    DateTime   @updatedAt @map("updated_at")
-  deletedAt    DateTime?  @db.Timestamp(6) @map("deleted_at")
+  id          Int       @id @default(autoincrement())
+  companyId   Int       @map("company_id")
+  title       String
+  description String
+  location    String
+  startDate   DateTime  @map("start_date")
+  endDate     DateTime  @map("end_date")
+  available   Boolean   @default(true)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamp(6)
 
-  company      company    @relation(fields: [companyId], references: [id])
+  company      company       @relation(fields: [companyId], references: [id])
   applications application[]
 
   @@map("job_offer")
+  
 }
 
 model application {
-  id         Int                @id @default(autoincrement())
-  personId   Int                @map("person_id")
-  offerId    Int                @map("offer_id")
-  status     application_status @default(PENDING)
-  appliedAt  DateTime           @default(now()) @map("applied_at")
-  updatedAt  DateTime           @updatedAt @map("updated_at")
+  id        Int                @id @default(autoincrement())
+  personId  Int                @map("person_id")
+  offerId   Int                @map("offer_id")
+  status    application_status @default(PENDING)
+  appliedAt DateTime           @default(now()) @map("applied_at")
+  updatedAt DateTime           @updatedAt @map("updated_at")
 
-  person     person             @relation(fields: [personId], references: [id])
-  offer      job_offer          @relation(fields: [offerId], references: [id])
+  person person    @relation(fields: [personId], references: [id])
+  offer  job_offer @relation(fields: [offerId], references: [id])
 
   @@map("application")
+  
 }
 
 model course {
-  id             Int        @id @default(autoincrement())
-  companyId      Int        @map("company_id")
+  id             Int       @id @default(autoincrement())
+  companyId      Int       @map("company_id")
   title          String
   description    String
   classification String?
-  active         Boolean    @default(true)
-  createdAt      DateTime   @default(now()) @map("created_at")
-  updatedAt      DateTime   @updatedAt @map("updated_at")
-  deletedAt      DateTime?  @db.Timestamp(6) @map("deleted_at")
+  active         Boolean   @default(true)
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamp(6)
 
-  company        company    @relation(fields: [companyId], references: [id])
-  enrollments    course_enrollment[]
+  company     company             @relation(fields: [companyId], references: [id])
+  enrollments course_enrollment[]
 
   @@map("course")
+  
 }
 
 model course_enrollment {
-  id          Int       @id @default(autoincrement())
-  courseId    Int       @map("course_id")
-  personId    Int       @map("person_id")
-  enrolledAt  DateTime  @default(now()) @map("enrolled_at")
+  id         Int      @id @default(autoincrement())
+  courseId   Int      @map("course_id")
+  personId   Int      @map("person_id")
+  enrolledAt DateTime @default(now()) @map("enrolled_at")
 
-  course      course    @relation(fields: [courseId], references: [id])
-  person      person    @relation(fields: [personId], references: [id])
+  course course @relation(fields: [courseId], references: [id])
+  person person @relation(fields: [personId], references: [id])
 
   @@unique([courseId, personId])
   @@map("course_enrollment")
+  
 }
 
 model suggestion {
-  id         Int               @id @default(autoincrement())
-  userId     Int               @map("user_id")
-  content    String
-  status     suggestion_status @default(PENDING)
-  createdAt  DateTime          @default(now()) @map("created_at")
+  id        Int               @id @default(autoincrement())
+  userId    String             @map("user_id") @db.Uuid
+  content   String
+  status    suggestion_status @default(PENDING)
+  createdAt DateTime          @default(now()) @map("created_at")
 
-  user       user              @relation(fields: [userId], references: [id])
-  votes      suggestion_vote[]
+  user  user              @relation(fields: [userId], references: [id])
+  votes suggestion_vote[]
 
   @@map("suggestion")
+  
 }
 
 model suggestion_vote {
-  id            Int       @id @default(autoincrement())
-  suggestionId  Int       @map("suggestion_id")
-  userId        Int       @map("user_id")
-  createdAt     DateTime  @default(now()) @map("created_at")
+  id           Int      @id @default(autoincrement())
+  suggestionId Int      @map("suggestion_id")
+  userId       String   @map("user_id") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at")
 
-  suggestion    suggestion @relation(fields: [suggestionId], references: [id])
-  user          user       @relation(fields: [userId], references: [id])
+  suggestion suggestion @relation(fields: [suggestionId], references: [id])
+  user       user       @relation(fields: [userId], references: [id])
 
   @@unique([suggestionId, userId])
   @@map("suggestion_vote")
+  
 }
 
 model company_branch {
-  id         Int      @id @default(autoincrement())
-  companyId  Int      @map("company_id")
-  branchId   Int      @map("branch_id")
+  id        Int @id @default(autoincrement())
+  companyId Int @map("company_id")
+  branchId  Int @map("branch_id")
+  userId    String @map("user_id") @db.Uuid
 
-  company    company  @relation(fields: [companyId], references: [id])
-  branch     branch   @relation(fields: [branchId], references: [id])
+  company company @relation(fields: [companyId], references: [id])
+  branch  branch  @relation(fields: [branchId], references: [id])
+  user    user    @relation(fields: [userId], references: [id])
 
   @@unique([companyId, branchId])
   @@map("company_branch")
+  
 }
