@@ -267,5 +267,5 @@ model company_branch {
 
   @@unique([companyId, branchId])
   @@map("company_branch")
-  
+
 }
