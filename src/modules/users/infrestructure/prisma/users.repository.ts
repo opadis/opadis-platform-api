@@ -2,84 +2,160 @@ import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/Connect/prisma.service";
 import { UsersRepository } from "../../domain/repositories/users.repository";
 import { User } from "../../domain/entities/users.entity";
-import { UserStatusMapper } from "../mappers/user-status.mapper"; // Importante
+import { UserStatusMapper } from "../mappers/user-status.mapper";
 
 @Injectable()
 export class PrismaUsersRepository implements UsersRepository {
-    constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-    async create(user: User): Promise<User> {
-        const created = await this.prisma.user.create({
-            data: {
-                name: user.name,
-                email: user.email,
-                password: user.password,
-                roleId: user.roleId,
-                status: UserStatusMapper.toPrisma(user.status),
-            },
-        });
+  async create(user: User): Promise<User> {
+    const created = await this.prisma.user.create({
+      data: {
+        name: user.name,
+        email: user.email,
+        password: user.password,
+        roleId: user.role?.id ?? user.roleId,
+        status: UserStatusMapper.toPrisma(user.status),
+      },
+      include: {
+        role: true,
+      },
+    });
 
-        return {
-            ...created,
-            status: UserStatusMapper.toDomain(created.status),
-        };
-    }
+    return new User(
+      created.id,
+      created.name,
+      created.email,
+      created.password,
+      created.roleId,
+      UserStatusMapper.toDomain(created.status),
+      created.role,
+      created.createdAt,
+      created.updatedAt,
+      created.deletedAt
+    );
+  }
 
-    async findall(): Promise<User[]> {
-        const users = await this.prisma.user.findMany();
-        return users.map((u) => ({
-            ...u,
-            status: UserStatusMapper.toDomain(u.status),
-        }));
-    }
+  async findall(): Promise<User[]> {
+    const users = await this.prisma.user.findMany({
+      include: {
+        role: true,
+      },
+    });
 
-    async findById(id: number): Promise<User | null> {
-        const user = await this.prisma.user.findUnique({ where: { id } });
-        if (!user) return null;
-        return {
-            ...user,
-            status: UserStatusMapper.toDomain(user.status),
-        };
-    }
+    return users.map((u) => new User(
+      u.id,
+      u.name,
+      u.email,
+      u.password,
+      u.roleId,
+      UserStatusMapper.toDomain(u.status),
+      u.role,
+      u.createdAt,
+      u.updatedAt,
+      u.deletedAt
+    ));
+  }
 
-    async findByEmail(email: string): Promise<User | null> {
-        const user = await this.prisma.user.findUnique({ where: { email } });
-        if (!user) return null;
-        return {
-            ...user,
-            status: UserStatusMapper.toDomain(user.status),
-        };
-    }
+  async findById(id: number): Promise<User | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      include: {
+        role: true,
+      },
+    });
 
-    async update(id: number, user: User): Promise<User> {
-        const updated = await this.prisma.user.update({
-            where: { id },
-            data: {
-                name: user.name,
-                email: user.email,
-                password: user.password,
-                roleId: user.roleId,
-                status: UserStatusMapper.toPrisma(user.status),
-            },
-        });
+    if (!user) return null;
 
-        return {
-            ...updated,
-            status: UserStatusMapper.toDomain(updated.status),
-        };
-    }
+    return new User(
+      user.id,
+      user.name,
+      user.email,
+      user.password,
+      user.roleId,
+      UserStatusMapper.toDomain(user.status),
+      user.role,
+      user.createdAt,
+      user.updatedAt,
+      user.deletedAt
+    );
+  }
 
-    async delete(id: number): Promise<User> {
-        const updated = await this.prisma.user.update({
-            where: { id },
-            data: {
-                status: "SUSPENDIDO", // O usa UserStatusMapper.toPrisma(DomainUserStatus.SUSPENDIDO)
-            },
-        });
+  async findByEmail(email: string): Promise<User | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+      include: {
+        role: true,
+      },
+    });
 
-        return {
-            ...updated,
-            status: UserStatusMapper.toDomain(updated.status),
-        };
-    }
+    if (!user) return null;
+
+    return new User(
+      user.id,
+      user.name,
+      user.email,
+      user.password,
+      user.roleId,
+      UserStatusMapper.toDomain(user.status),
+      user.role,
+      user.createdAt,
+      user.updatedAt,
+      user.deletedAt
+    );
+  }
+
+  async update(id: number, user: User): Promise<User> {
+    const updated = await this.prisma.user.update({
+      where: { id },
+      data: {
+        name: user.name,
+        email: user.email,
+        password: user.password,
+        roleId: user.role?.id ?? user.roleId,
+        status: UserStatusMapper.toPrisma(user.status),
+      },
+      include: {
+        role: true,
+      },
+    });
+
+    return new User(
+      updated.id,
+      updated.name,
+      updated.email,
+      updated.password,
+      updated.roleId,
+      UserStatusMapper.toDomain(updated.status),
+      updated.role,
+      updated.createdAt,
+      updated.updatedAt,
+      updated.deletedAt
+    );
+  }
+
+  async delete(id: number): Promise<User> {
+    const updated = await this.prisma.user.update({
+      where: { id },
+      data: {
+        status: "SUSPENDIDO",
+      },
+      include: {
+        role: true,
+      },
+    });
+
+    return new User(
+      updated.id,
+      updated.name,
+      updated.email,
+      updated.password,
+      updated.roleId,
+      UserStatusMapper.toDomain(updated.status),
+      updated.role,
+      updated.createdAt,
+      updated.updatedAt,
+      updated.deletedAt
+    );
+  }
 }
