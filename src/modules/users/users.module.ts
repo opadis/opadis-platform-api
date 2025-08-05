@@ -7,9 +7,10 @@ import { UpdateUserCase } from "./application/use-case/update-product.use-case";
 import { SoftDeletedUserUseCase } from "./application/use-case/soft-deleted-user.use-case";
 import { UsersRepository } from "./domain/repositories/users.repository";
 import { PrismaUsersRepository } from "./infrestructure/prisma/users.repository";
+import { RoleModule } from "../roles/role.module";
 
 @Module({
-    imports: [PrismaModule],
+    imports: [PrismaModule, RoleModule],
     controllers: [UsersController],
     providers: [
         CreateUsersUseCase,
