@@ -1,9 +1,8 @@
-import { Injectable } from "@nestjs/common";
-import { PrismaService } from "src/Connect/prisma.service";
-import { UsersRepository } from "../../domain/repositories/users.repository";
-import { User } from "../../domain/entities/users.entity";
-import { UserStatusMapper } from "../mappers/user-status.mapper";
-
+import { Injectable } from '@nestjs/common';
+import { UsersRepository } from '../../domain/repositories/users.repository';
+import { User } from '../../domain/entities/users.entity';
+import { UserStatusMapper } from '../mappers/user-status.mapper';
+import { PrismaService } from '../../../../connect/prisma.service';
 @Injectable()
 export class PrismaUsersRepository implements UsersRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -32,7 +31,7 @@ export class PrismaUsersRepository implements UsersRepository {
       created.role,
       created.createdAt,
       created.updatedAt,
-      created.deletedAt
+      created.deletedAt,
     );
   }
 
@@ -43,18 +42,21 @@ export class PrismaUsersRepository implements UsersRepository {
       },
     });
 
-    return users.map((u) => new User(
-      u.id,
-      u.name,
-      u.email,
-      u.password,
-      u.roleId,
-      UserStatusMapper.toDomain(u.status),
-      u.role,
-      u.createdAt,
-      u.updatedAt,
-      u.deletedAt
-    ));
+    return users.map(
+      (u) =>
+        new User(
+          u.id,
+          u.name,
+          u.email,
+          u.password,
+          u.roleId,
+          UserStatusMapper.toDomain(u.status),
+          u.role,
+          u.createdAt,
+          u.updatedAt,
+          u.deletedAt,
+        ),
+    );
   }
 
   async findById(id: number): Promise<User | null> {
@@ -77,7 +79,7 @@ export class PrismaUsersRepository implements UsersRepository {
       user.role,
       user.createdAt,
       user.updatedAt,
-      user.deletedAt
+      user.deletedAt,
     );
   }
 
@@ -101,7 +103,7 @@ export class PrismaUsersRepository implements UsersRepository {
       user.role,
       user.createdAt,
       user.updatedAt,
-      user.deletedAt
+      user.deletedAt,
     );
   }
 
@@ -114,6 +116,7 @@ export class PrismaUsersRepository implements UsersRepository {
         password: user.password,
         roleId: user.role?.id ?? user.roleId,
         status: UserStatusMapper.toPrisma(user.status),
+        deletedAt: user.deletedAt, // <--- Aquí agregas esta línea
       },
       include: {
         role: true,
@@ -130,7 +133,7 @@ export class PrismaUsersRepository implements UsersRepository {
       updated.role,
       updated.createdAt,
       updated.updatedAt,
-      updated.deletedAt
+      updated.deletedAt,
     );
   }
 
@@ -138,7 +141,7 @@ export class PrismaUsersRepository implements UsersRepository {
     const updated = await this.prisma.user.update({
       where: { id },
       data: {
-        status: "SUSPENDIDO",
+        status: 'SUSPENDIDO',
       },
       include: {
         role: true,
@@ -155,7 +158,7 @@ export class PrismaUsersRepository implements UsersRepository {
       updated.role,
       updated.createdAt,
       updated.updatedAt,
-      updated.deletedAt
+      updated.deletedAt,
     );
   }
 }

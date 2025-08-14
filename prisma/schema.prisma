@@ -38,14 +38,18 @@ enum suggestion_status {
 
 // Tablas
 model role {
-  id    Int    @id @default(autoincrement())
-  name  String @unique
-  isDeleted Boolean @default(false) @map("is_deleted")
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  isDeleted Boolean  @default(false) @map("is_deleted")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
-  users user[]
+  users     user[]
 
   @@map("role")
 }
+
 
 model user {
   id          Int        @id @default(autoincrement())
