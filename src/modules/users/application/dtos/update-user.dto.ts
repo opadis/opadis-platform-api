@@ -18,4 +18,3 @@ export class UpdateUserDto {
   @IsEnum(UserStatus, { message: 'El estado debe ser ACTIVO o SUSPENDIDO' })
   status?: UserStatus; // <-- Enum del dominio, no de Prisma
 }
-

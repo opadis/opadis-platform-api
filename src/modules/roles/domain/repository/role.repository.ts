@@ -1,4 +1,4 @@
-import { Role } from "../enteties/role.entity";
+import { Role } from '../enteties/role.entity';
 
 export abstract class RoleRepository {
   abstract create(role: Role): Promise<Role>;
@@ -6,5 +6,5 @@ export abstract class RoleRepository {
   abstract update(id: number, role: Partial<Role>): Promise<Role>;
   abstract delete(id: number): Promise<void>;
   abstract findAll(): Promise<Role[]>;
-    abstract findByName(name: string): Promise<Role | null>; 
+  abstract findByName(name: string): Promise<Role | null>;
 }

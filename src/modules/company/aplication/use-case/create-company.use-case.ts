@@ -1,6 +1,6 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { CompanyRepository } from '../../domain/repositories/company.repository';
-import { CreateCompanyDto } from '../dtos/create-compant.dto';
+import { CreateCompanyDto } from '../dtos/create-company.dto';
 import { Company } from '../../domain/entities/company.entity';
 import { CompanyValidationStatus } from '../../domain/enums/company.enum';
 

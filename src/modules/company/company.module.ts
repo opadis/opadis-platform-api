@@ -6,7 +6,7 @@ import { UpdateCompanyUseCase } from './aplication/use-case/update-company.use-c
 import { SoftDeletedCompanyUseCase } from './aplication/use-case/soft-deleted-company.use-case';
 import { CompanyRepository } from './domain/repositories/company.repository';
 import { CompanyPrismaRepository } from './infrastructure/prisma/company.repository';
-import { PrismaModule } from 'src/Connect/prisma.module';
+import { PrismaModule } from 'src/connect/prisma.module';
 
 @Module({
   controllers: [CompanyController],
