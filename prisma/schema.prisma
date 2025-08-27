@@ -75,10 +75,10 @@ model user {
 model person {
   id                Int                @id @default(autoincrement())
   userId            Int                @unique @map("user_id")
-  curriculum        String?
-  disabilityType    String?            @map("disability_type")
-  location          String?
-  jobProfile        String?            @map("job_profile")
+  curriculum        String
+  disabilityType    String            @map("disability_type")
+  location          String
+  jobProfile        String            @map("job_profile")
   createdAt         DateTime           @default(now()) @map("created_at")
   updatedAt         DateTime           @updatedAt @map("updated_at")
   deletedAt         DateTime?          @db.Timestamp(6) @map("deleted_at")
