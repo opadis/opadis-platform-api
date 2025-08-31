@@ -1,9 +1,9 @@
-import { HttpException, Injectable } from "@nestjs/common";
-import { UsersRepository } from "../../domain/repositories/users.repository";
-import { User } from "../../domain/entities/users.entity";
-import { CreateUserDto } from "../dtos/create-user.dto";
-import { UserStatus } from "../../domain/enums/user-status.enum";
-import { RoleRepository } from "../../../roles/domain/repository/users.repository"; // Importamos el RoleRepository
+import { HttpException, Injectable } from '@nestjs/common';
+import { UsersRepository } from '../../domain/repositories/users.repository';
+import { User } from '../../domain/entities/users.entity';
+import { CreateUserDto } from '../dtos/create-user.dto';
+import { UserStatus } from '../../domain/enums/user-status.enum';
+import { RoleRepository } from '../../../roles/domain/repository/role.repository'; // Importamos el RoleRepository
 
 @Injectable()
 export class CreateUsersUseCase {
@@ -14,7 +14,9 @@ export class CreateUsersUseCase {
 
   async createUser(data: CreateUserDto): Promise<User> {
     try {
-      const isValidStatus = Object.values(UserStatus).includes(data.status as UserStatus);
+      const isValidStatus = Object.values(UserStatus).includes(
+        data.status as UserStatus,
+      );
       if (!isValidStatus) {
         throw new HttpException({ Error: 'Estado inválido.' }, 400);
       }
@@ -46,4 +48,3 @@ export class CreateUsersUseCase {
     }
   }
 }
-

@@ -12,7 +12,7 @@ import { UpdateCompanyUseCase } from '../../aplication/use-case/update-company.u
 import { SoftDeletedCompanyUseCase } from '../../aplication/use-case/soft-deleted-company.use-case';
 import { getCompanyUseCase } from '../../aplication/use-case/get-company.use-case';
 import { Company } from '../../domain/entities/company.entity';
-import { CreateCompanyDto } from '../../aplication/dtos/create-compant.dto';
+import { CreateCompanyDto } from '../../aplication/dtos/create-company.dto';
 import { UpdateCompanyDto } from '../../aplication/dtos/update-company.dto';
 
 @Controller('company')
