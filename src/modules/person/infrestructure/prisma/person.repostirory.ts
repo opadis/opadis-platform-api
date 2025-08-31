@@ -1,30 +1,33 @@
-import { Injectable } from "@nestjs/common";
-import { PersonRepository } from "../../domain/repositories/person.repository";
-import { Person } from "../../domain/entities/person.entity";   
-import { PrismaService } from "../../../../connect/prisma.service";
-import { User } from "src/modules/users/domain/entities/users.entity";
-import { UserStatusMapper } from "src/modules/users/infrestructure/mappers/user-status.mapper";
+import { Injectable } from '@nestjs/common';
+import { PersonRepository } from '../../domain/repositories/person.repository';
+import { Person } from '../../domain/entities/person.entity';
+import { PrismaService } from '../../../../connect/prisma.service';
+import { User } from 'src/modules/users/domain/entities/users.entity';
+import { UserStatusMapper } from 'src/modules/users/infrestructure/mappers/user-status.mapper';
+import { person, user } from '@prisma/client';
 
 @Injectable()
 export class PrismaPersonRepository implements PersonRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  private mapPrismaUserToDomain(user: any): User {
+  
+  private mapPrismaUserToDomain(user: user): User {
     return new User(
       user.id,
       user.name,
       user.email,
       user.password,
       user.roleId,
-      UserStatusMapper.toDomain(user.status), // mapea a UserStatus
-      user.role ?? undefined,
+      UserStatusMapper.toDomain(user.status),
+      undefined, 
       user.createdAt,
       user.updatedAt,
       user.deletedAt,
     );
   }
 
-  private mapPrismaPersonToDomain(p: any): Person {
+  // Mapear person de Prisma a dominio
+  private mapPrismaPersonToDomain(p: person & { user?: user | null }): Person {
     const domainUser = p.user ? this.mapPrismaUserToDomain(p.user) : undefined;
     return new Person(
       p.id,
@@ -51,13 +54,14 @@ export class PrismaPersonRepository implements PersonRepository {
       },
       include: { user: true },
     });
-
     return this.mapPrismaPersonToDomain(created);
   }
 
   async findAll(): Promise<Person[]> {
-    const persons = await this.prisma.person.findMany({ include: { user: true } });
-    return persons.map(this.mapPrismaPersonToDomain);
+    const persons = await this.prisma.person.findMany({
+      include: { user: true },
+    });
+    return persons.map((p) => this.mapPrismaPersonToDomain(p));
   }
 
   async findById(id: string): Promise<Person | null> {
